@@ -4,17 +4,26 @@ require 'json'
 require 'pry'
 
 
-
 cannabis_data = RestClient.get('http://strainapi.evanbusse.com/rbLiiPJ/strains/search/all')
 cannabis_JSON = JSON.parse(cannabis_data)
 
 
-cannabis_JSON.each do |strain|
-  Strain.create(name: strain[0], race: strain[1]["race"], medical:strain[1]["effects"]["medical"].join(", "),
-    positive_effects:strain[1]["effects"]["positive"].join(", "), flavors:strain[1]["flavors"].join(", "))
-  end
 
-def create_users
+def find_strains_from_api_for_medical_purposes(user_search_input)
+
+    array_of_choices = Strain.all.select do |strain|
+      strain.medical.include?(user_search_input.capitalize)
+    end
+  
+  userArr = array_of_choices.shuffle[0,5]
+  userArr
+   binding.pry
+end
+
+
+find_strains_from_api_for_medical_purposes("Pain")
+
+
   trav = User.create(name:"travis")
   josh = User.create(name: "josh")
   john = User.create(name: "john")
@@ -49,4 +58,87 @@ def create_users
   eric = User.create(name: "eric")
   ariel = User.create(name: "ariel")
 
-end
+
+Pry.start
+  # afpak = Strain.find(1)
+  # african = Strain.find(2)
+  # afternoon_delight = Strain.find(3)
+  # afwreck = Strain.find(4)
+  # agent_orange = Strain.find(5)
+  # agent_tangie = Strain.find(6)
+  # alaska = Strain.find(7)
+  # alaska_thunder_grape = Strain.find(8)
+  # alaskan_ice = Strain.find(9)
+  # albert_walker = Strain.find(11)
+  # alchemy = Strain.find(12)
+  # alf = Strain.find(13)
+  # alice_in_wonderland = Strain.find(14)
+  # alien_abduction = Strain.find(15)
+  # alien_apparition = Strain.find(16)
+  # alien_bubba = Strain.find(18)
+  # alien_dawg = Strain.find(19)
+  # alien_dutchess = Strain.find(20)
+  # alien_inferno = Strain.find(22)
+  # alien_kush = Strain.find(23)
+  # alien_og = Strain.find(24)
+  # alien_reunion = Strain.find(25)
+  # alien_rift = Strain.find(26)
+  # alien_rock_candy = Strain.find(27)
+  # alien_sour_apple = Strain.find(28)
+  # alien_stardawg = Strain.find(29)
+  # alien_technology = Strain.find(30)
+  # allen_wrench = Strain.find(32)
+  # allkush = Strain.find(33)
+  # aloha = Strain.find(34)
+  # aloha_limone = Strain.find(35)
+  # alohaberry = Strain.find(36)
+  # alpha_blue = Strain.find(37)
+  # alpha_express = Strain.find(38)
+  # alpha_og = Strain.find(39)
+  # alpine_blue = Strain.find(40)
+  # alpine_star = Strain.find(41)
+  # ambrosia = Strain.find(42)
+  # american_dream = Strain.find(43)
+  # american_kush = Strain.find(44)
+  # americano = Strain.find(45)
+  # amnesia = Strain.find(46)
+  # amnesia_haze = Strain.find(47)
+  # ancient_kush = Strain.find(48)
+  # ancient_og = Strain.find(49)
+  # anesthesia = Strain.find(50)
+  # angel_og = Strain.find(51)
+  # animal_cookies = Strain.find(52)
+  # anonymous_og = Strain.find(53)
+  # ape_shit = Strain.find(54)
+  # apollo_11 = Strain.find(55)
+  # apollo_13 = Strain.find(56)
+  # appalachia = Strain.find(57)
+  # appalachian_power = Strain.find(58)
+  # apple_jack = Strain.find(59)
+  # apple_kush = Strain.find(60)
+  # appleberry = Strain.find(61)
+  # arctic_sun = Strain.find(62)
+  # articblue = Strain.find(63)
+  # area_51 = Strain.find(64)
+  # argyle = Strain.find(65)
+  # arjans_strawberry_haze = Strain.find(66)
+  # arjans_ultra_haze_1 = Strain.find(67)
+  # armageddon = Strain.find(68)
+  # armagnac = Strain.find(69)
+  # ash = Strain.find(70)
+  # asian_fantasy = Strain.find(71)
+  # aspen_og = Strain.find(72)
+  # astroboy = Strain.find(73)
+  # athabasca = Strain.find(74)
+  # atmosphere = Strain.find(75)
+  # atomic_goat = Strain.find(76)
+  # blue_dream = Strain.find(259)
+  # girl_scout_cookies = Strain.find(758)
+  # og_kush = Strain.find(1311)
+  # bubba_kush = Strain.find(342)
+  # fire_og = Strain.find(697)
+  # sfv_og = Strain.find(1589)
+  # tahoe_og_kush = Strain.find(1754)
+  # blueberry = Strain.find(301)
+  # golden_goat = Strain.find(782)
+  # mk_ultra = Strain.find(1159)
