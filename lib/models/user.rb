@@ -1,6 +1,6 @@
 class User < ActiveRecord::Base
-has_many :userstrains
-has_many :strains, through: :userstrains
+has_many :user_strains
+has_many :strains, through: :user_strains
 has_many :user_searches
 has_many :searches, through: :user_searches
 

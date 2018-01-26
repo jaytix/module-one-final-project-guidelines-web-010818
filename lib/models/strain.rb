@@ -1,4 +1,4 @@
 class Strain < ActiveRecord::Base
-has_many :userstrains
-has_many :users, through: :userstrains 
+has_many :user_strains
+has_many :users, through: :user_strains 
 end

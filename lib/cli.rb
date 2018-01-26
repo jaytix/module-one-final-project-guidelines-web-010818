@@ -1,43 +1,64 @@
 class CLI
-
   def welcome
     puts "Welcome to our app"
-    puts "what is your name?"
-    input = gets.chomp
-    input
+
   end
 
-  def create_new_user(input)
-    @user = User.find_or_create_by(name: input)
+
+  def sign_in_or_sign_up
+    puts "Welcome to our app"
+    puts "do you have a User Pin?(y/n)"
+    userpin = gets.chomp
+    if userpin == "y"
+      puts "enter pin"
+      pin = gets.chomp.to_i
+      @user = User.find(pin)
+      puts "Welcome back #{@user.name}"
+      sleep(1)
+      main_menu
+    elsif userpin == "n"
+      puts "What is your name?"
+      username = gets.chomp
+      @user = User.create(name: username)
+      puts "Hey #{@user.name}"
+      puts "Your pin is #{@user.id}"
+      sleep(1)
+      main_menu
+    else
+      puts "make a valid selection"
+      main_menu
+    end
+
   end
 
   def main_menu
+    puts "Welecome to the Main Menu!"
+    puts "Make a selection"
     puts "1. Aliments"
     puts "2. Good Vibes"
-    puts "3. Search"
+    puts "3. Search for Users"
     puts "4. Strain of the Day"
-    puts "5. Exit"
+    puts "5. Favorites"
+    puts "6. Exit"
     puts "Enter a number [1-5]"
     input = gets.chomp
 
     case input
     when "1"
       #aliments method
-      more_info_method(first_ailemnt_method)
+      more_medical_info_method(first_ailemnt_method)
     when "2"
-      more_info_method(first_positve_method)
+      more_positive_info_method(first_positve_method)
     when "3"
-      access_favorites_method
+      next_method(access_users_of_strains)
     when "4"
       #strain of the day method
       strain_of_the_day
       main_menu
     when "5"
-      #exit APP
-    when "password1"
-      #admin function select user by user id to display user info
-    when "password2"
-      #admin function search by search history
+      view_favorite_strains
+    when "6"
+      exit
     else
       puts "you have entered an incorrect key. please try again"
       main_menu
@@ -58,6 +79,11 @@ class CLI
     input
   end
 
+  def ailments_arr
+    ailments_array = ["Insomnia","Pain","Stress","Nausea","Fatigue",
+     "Headache","Muscle Spasms","Depression","Cramps","Inflammation"]
+   end
+
 
   def retrieve_user_strains(array)
     array.each_with_index {|strain,indx| puts "#{indx+1}.#{strain.name}"}
@@ -72,10 +98,6 @@ class CLI
     userArr
   end
 
-def ailments_arr
-  ailments_array = ["Insomnia","Pain","Stress","Lack of Appetite","Nausea","Fatigue",
-   "Headache","Muscle Spasms","Depression","Cramps","Inflammation","Eye Pressure"]
- end
 
   def first_ailemnt_method
     puts "What seems to be bothering you?"
@@ -103,8 +125,9 @@ def ailments_arr
     user_strain_arr
 end
 
-def more_info_method(array)
+def more_medical_info_method(array)
   houseArr = array
+  # houseArr2 = array
   puts "Select a strain for more information"
   puts "Enter key from 1-5"
   input = gets.chomp
@@ -113,22 +136,32 @@ def more_info_method(array)
   if input < 6
     array.each_with_index do |strain,ind|
       if input == ind
-        new_strain_arr << strain
         puts "name: #{strain.name}"
-        puts "race: #{strain.race}"
-        puts "flavor: #{strain.flavors}"
+        puts "race: #{strain.race.capitalize}"
+        puts "flavors: #{strain.flavors}"
         puts "positive effects: #{strain.positive_effects}"
           puts "Would you like to add this strain to your favorites?(y/n)"
           userin = gets.chomp.downcase
           if userin == "y"
-            UserStrain.create(user_id: @user.id, strain_id: strain.id)
-            puts "#{strain.name} has been added to your favorites!"
+            current_US = UserStrain.find_by(user_id: @user.id)
+              if  current_US == nil
+                  UserStrain.create(user_id: @user.id, strain_id: strain.id)
+                  puts "#{strain.name} has been added to you favorites"
+              elsif !(current_US.user.strains.include? (strain))
+                    UserStrain.create(user_id: @user.id, strain_id: strain.id)
+                    puts "#{strain.name} has been added to your favorites"
+              elsif current_US.user.strains.include? (strain)
+                puts "#{strain.name} is already in your favorites"
+              end
+
+          elsif userin == "n"
+            puts "Ok.. moving along.."
+
           end
+
         end
       end
-  else
-    "make a valid selection"
-    more_info_method(houseArr)
+
   end
 
   puts "Would you like to.."
@@ -136,20 +169,22 @@ def more_info_method(array)
   puts "2. Go to Main Menu"
   userinput = gets.chomp.to_i
   if userinput == 1
-    puts "#{@user.name}'s Strains'"
+    puts "#{@user.name.capitalize}'s Strains'"
     houseArr.each_with_index do |strain,ind|
        puts "#{ind+1}.#{strain.name}"
      end
-    more_info_method(houseArr)
+    more_medical_info_method(houseArr)
   elsif userinput == 2
     main_menu
   end
 
 end
 
-#############################
-############################ positive_effects
-#######################
+
+
+#######################################################################################
+############################ positive_effects#############################
+#################################################################################
 
 def positives_arr
   pos_array=["Relaxed","Euphoric","Happy","Energetic","Focused","Giggly",
@@ -164,15 +199,11 @@ def list_of_positives
   puts "1.Relaxed 2.Euphoric 3.Happy 4.Energetic"
   puts "5.Focused 6.Giggly 7.Creative 8.Uplifted"
   puts "9.Sleepy 10.Talkative 11.Hungry"
-  puts "Please enter the number that cooresponds with your discomfort."
+  puts "Please enter the number that cooresponds with desired Vibe."
   input = gets.chomp
   input
 end
 
-def retrieve_user_strains(array)
-  array.each_with_index {|strain,indx| puts "#{indx+1}.#{strain.name}"}
-  array
-end
 
 def find_strains_from_api_for_positive_purposes(user_search_input)
     array_of_choices = Strain.all.select do |strain|
@@ -210,7 +241,7 @@ def first_positve_method
 end
 
 
-def more_info_method(array)
+def more_positive_info_method(array)
   houseArr = array
   puts "Select a strain for more information"
   puts "Enter key from 1-5"
@@ -220,26 +251,36 @@ def more_info_method(array)
   if input < 6
     array.each_with_index do |strain,ind|
       if input == ind
-        binding.pry
         puts "name: #{strain.name}"
-        puts "race: #{strain.race}"
-        puts "flavor: #{strain.flavors}"
-        puts "Helps alleviate discomfort from: #{strain.medical}"
+        puts "race: #{strain.race.capitalize}"
+        puts "flavors: #{strain.flavors}"
+        puts "may alleviate discomfort from: #{strain.medical.gsub(/ Lack of Appetite,/,"")}"
           puts "Would you like to add this strain to your favorites?(y/n)"
           userin = gets.chomp.downcase
           if userin == "y"
-            UserStrain.create(user_id: @user.id, strain_id: strain.id)
-            puts "#{strain.name} has been added to your favorites!"
+            current_US = UserStrain.find_by(user_id: @user.id)
+            if current_US == nil
+              UserStrain.create(user_id: @user.id, strain_id: strain.id)
+              puts "#{strain.name} has been added to your favorites"
+            elsif !(current_US.user.strains.include? (strain))
+                UserStrain.create(user_id: @user.id, strain_id: strain.id)
+                puts "#{strain.name} has been added to your favorites"
+            elsif current_US.user.strains.include? (strain)
+                puts "#{strain.name} is already in your favorites"
+              end
+
+          elsif userin == "n"
+            puts "Ok.. moving along .."
+
           end
-        end
-      end
-  else
-    "make a valid selection"
-    more_info_method(houseArr)
-  end
+       end
+     end
+    else
+
+   end
 
   puts "Would you like to.."
-  puts "1. Learn more about Recommended Strain"
+  puts "1. Learn more about a Recommended Strain"
   puts "2. Go to Main Menu"
   userinput = gets.chomp.to_i
   if userinput == 1
@@ -247,34 +288,128 @@ def more_info_method(array)
     houseArr.each_with_index do |strain,ind|
        puts "#{ind+1}.#{strain.name}"
      end
-    more_info_method(houseArr)
+    more_positive_info_method(houseArr)
   elsif userinput == 2
+    main_menu
+  else
     main_menu
   end
 
 end
 
 
-#############################
-############################ favorites
-#######################
+##################################################################
+############################ favorites########################################
+###############################################################
 
 
-def access_favorites_method
-  user_fave = UserStrain.all.select do |ustrain|
-    ustrain.user_id == @user
 
-  binding.pry
-end
-end
-def recipes #ok
-    myRecipes = RecipeCard.all.select do |rCard|
-      rCard.user == self
+def access_users_of_strains
+  puts "Enter a Strain to see its Users"
+  userinput = nil
+  userinput = gets.chomp.titleize
+    if Strain.all.find_by(name: userinput) != nil
+      popStrain = Strain.all.find_by(name: userinput)
+    else
+      puts "That strain does not exist. Choose another"
+      access_users_of_strains
     end
-    myRecipes.map do |myrecipecard|
-      myrecipecard.recipe
+  puts "Most popular Users of #{popStrain.name}."
+  popStrain.users[0,10].each_with_index {|user,ind| puts "#{ind+1}. #{user.name}"}
+  popStrain
+end
+
+def next_method(strain)
+  houseStrain = strain
+  puts "What would you like to do next?"
+  puts "1. Learn more info about #{strain.name}?"
+  puts "2. Search for Users of another Strain"
+  puts "3. Add Strain to Favorites"
+  puts "4. Return to Main Menu"
+  input = gets.chomp.to_i
+    if input == 1
+      puts "name: #{strain.name}"
+      puts "race: #{strain.race.capitalize}"
+      puts "flavors: #{strain.flavors}"
+      puts "positive_effects: #{strain.positive_effects}"
+      puts "may alleviate discomfort from: #{strain.medical.gsub(/ Lack of Appetite,/,"")}"
+      next_method(houseStrain)
+    elsif input == 2
+      next_method(access_users_of_strains)
+    elsif input == 3
+      current_US = UserStrain.find_by(user_id: @user.id)
+      if current_US == nil
+        UserStrain.create(user_id: @user.id, strain_id: strain.id)
+        puts "#{strain.name} has been added to your favorites"
+      elsif !(current_US.user.strains.include? (strain))
+          UserStrain.create(user_id: @user.id, strain_id: strain.id)
+          puts "#{strain.name} has been added to your favorites"
+      elsif current_US.user.strains.include? (strain)
+          puts "#{strain.name} is already in your favorites"
+        end
+        next_method(houseStrain)
+    elsif input == 4
+      main_menu
+    else
+      puts "make another selection"
+      next_method(houseStrain)
     end
   end
+
+  def view_favorite_strains
+    current_US = UserStrain.find_by(user_id: @user.id)
+    if current_US == nil
+      puts "You have no favorite strains"
+      sleep(1)
+      main_menu
+    else
+      puts "These are your favorite strains"
+      ustrain = current_US.user.strains.each_with_index {|us,ind| puts "#{ind+1}. #{us.name}"}
+    end
+    puts "Would u like more info about a Strain? (y/n)"
+    userinput = gets.chomp.downcase
+      if userinput == "y"
+        favorites_info(ustrain)
+      else
+        puts "ok.. moving along.."
+        main_menu
+      end
+    ustrain
+  end
+
+
+      def favorites_info(array)
+          houseArr = array
+          array.each_with_index {|us,ind| puts "#{ind+1}. #{us.name}"}
+          puts "Select the strain to find more info"
+          input = gets.chomp
+          input = input.to_i
+          input -= 1
+          array.each_with_index do |us,ind|
+            if input == ind
+              puts "name: #{us.name}"
+              puts "race: #{us.race.capitalize}"
+              puts "flavors: #{us.flavors}"
+              puts "Vibe effects:#{us.positive_effects}"
+              puts "may alleviate discomfort from: #{us.medical.gsub(/ Lack of Appetite,/,"")}"
+              sleep(1)
+              puts "Would u like to..."
+              puts "1. Learn more about your favorites"
+              puts "2. Return to Main Menu"
+                newput = gets.chomp.to_i
+                if newput == 1
+                  view_favorite_strains(houseArr)
+                elsif newput == 2
+                  main_menu
+                end
+             end
+           end
+        main_menu
+    end
+
+
+
+
 
 
 
@@ -291,68 +426,12 @@ def recipes #ok
 
 
 def run
-input = welcome
-user = create_new_user(input)
-puts "Welcome #{user.name.titleize}"
- main_menu
+sign_in_or_sign_up
+main_menu
 end
 
 
 
-
-
-
-
-  # def anything_else
-  #   puts "is there anything else bothering you?(y/n)"
-  #   input = gets.chomp
-  #   if input.downcase == "y"
-  #     another_ailment_method
-  #   elsif choice.downcase == "n"
-  #     puts "choose a strain to add to your favorites"
-  #     favorites_method(first_ailemnt_method)
-  #   else
-  #     puts "I don't think we can help with that. Make another selection"
-  #     anything_else
-  #   end
-  # end
-  #
-  # def another_ailment_method
-  #   list_of_ailments
-  #   ailments_Array.each_with_index do |ailment,ind|
-  #     if choice.to_i == ind
-  #       puts "#{ailment}"
-  #       second_ailmentStrain_arr = user_ailmentStrain_array.select {|strain| strain.medical.include?(ailment)}
-  #     else
-  #       puts "I don't think we can help with that. Make another selection"
-  #       another_ailment_method
-  #     end
-  #   end
-  #   puts "We Recommend these strains for what ails you"
-  #   retrieve_user_strains(second_ailmentStrain_arr) #return value is 2ndStrainArr
-  # end
-  #
-  # def strain_of_the_day
-  #   random_strain = Strain.all.sample
-  #   puts random_strain.name
-  #   puts random_strain.race
-  # end
-
-  # def favorites_method(strainArr)
-  #   puts "You got some good stuff, would you like more info (y/n)"
-  #   choice
-  #   if choice.downcase == "y"
-  #     puts "Which strain would you like to know more about?"
-  #     puts "Please select the number that cooresponds"
-  #     retrieve_user_strains(strainArr)
-  #     choice
-  #     strainArr.each_with_index do |strain,indx|
-  #       if choice.to_i == indx+1
-  #         puts "#{strain}"
-  #       end
-  #     end
-  #   end
-  # end
 
 
 
