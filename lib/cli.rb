@@ -1,32 +1,71 @@
 class CLI
   def welcome
     puts "Welcome to our app"
-
   end
 
+  def user_password(pin)
+    tru = true
+    pinword = gets.chomp
+     if !(User.find_by(user_id: pin, password: pinword))
+       tru = false
+     end
+     tru
+   end
 
   def sign_in_or_sign_up
     puts "Welcome to our app"
-    puts "do you have a User Pin?(y/n)"
-    userpin = gets.chomp
-    if userpin == "y"
+    puts "Do you have a User Pin?"
+    puts "1. Yes, I have a pin"
+    puts "2. No. I do not have a pin"
+    userpin = gets.chomp.to_i
+    if userpin == 1
       puts "enter pin"
       pin = gets.chomp.to_i
-      @user = User.find(pin)
-      puts "Welcome back #{@user.name}"
+      binding.pry
+      if !(User.find(pin))
+        puts "Incorrect Pin."
+        puts "Please try again"
+        sign_in_or_sign_up
+      elsif User.find_by(id: pin, password: nil)
+        puts "New rules: All acconuts must have a password"
+        puts "Enter New Password below"
+        pword = gets.chomp
+        User.find(pin).password = pword
+        @user = User.find_by(id: pin, password: pword)
+        puts "Please Sign in again"
+        sign_in_or_sign_up
+      elsif user_password(pin) == false
+        puts " Incorrect password. Please try again."
+        sign_in_or_sign_up
+      elsif
+        user_password(pin) == true
+        puts "Please re-enter password"
+        pword = gets.chomp
+        User.find_by(id: pin, password: pword)
+        @user = User.find_by(id: pin, password: pword)
+        puts "Welcome back #{@user.name}"
+        main_menu
+      end
+
+    elsif userpin == 2
+      puts "You must create an account before using our services"
+      puts "You'll get your pin shortly."
+      sleep(1.4)
+      puts "Lets first start with your name and password"
       sleep(1)
-      main_menu
-    elsif userpin == "n"
-      puts "What is your name?"
+      puts "Enter is your name"
       username = gets.chomp
-      @user = User.create(name: username)
+      puts "Almost done.. Now enter your password"
+      pword = gets.chomp
+      @user = User.create(name: username, password: pword )
       puts "Hey #{@user.name}"
       puts "Your pin is #{@user.id}"
+      puts "Now you're Valid. Get started at the Main Menu"
       sleep(1)
       main_menu
     else
       puts "make a valid selection"
-      main_menu
+      sign_in_or_sign_up
     end
 
   end
@@ -275,7 +314,6 @@ def more_positive_info_method(array)
           end
        end
      end
-    else
 
    end
 
@@ -314,8 +352,10 @@ def access_users_of_strains
       puts "That strain does not exist. Choose another"
       access_users_of_strains
     end
-  puts "Most popular Users of #{popStrain.name}."
-  popStrain.users[0,10].each_with_index {|user,ind| puts "#{ind+1}. #{user.name}"}
+  puts "Most popular Users of #{userinput}."
+  popStrain.users.each_with_index {|user,ind| puts "#{ind+1}. #{user.name}"}
+  binding.pry
+
   popStrain
 end
 
@@ -409,30 +449,22 @@ def next_method(strain)
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 def run
 sign_in_or_sign_up
 main_menu
 end
 
 
-
-
-
-
 end
+
+# puts "puts do you want to add Strain of the Day to favorites"
+# current_US = UserStrain.find_by(user_id: @user.id)
+# if current_US == nil
+#   UserStrain.create(user_id: @user.id, strain_id: strain.id)
+#   puts "#{strain.name} has been added to your favorites"
+# elsif !(current_US.user.strains.include? (strain))
+#     UserStrain.create(user_id: @user.id, strain_id: strain.id)
+#     puts "#{strain.name} has been added to your favorites"
+# elsif current_US.user.strains.include? (strain)
+#     puts "#{strain.name} is already in your favorites"
+#   end
